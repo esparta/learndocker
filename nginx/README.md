@@ -92,4 +92,30 @@ The takeaway of the lesson: If possible, try to send the logs to $STDOUT & $STDE
 
 More about this in [Using logfiles][using logfiles].
 
+Copying data
+---
+
+We did learn how to copy files into the image we are trying to build. Our
+new Dockerfile is this:
+
+```
+FROM debian:9-slim
+
+RUN apt-get update
+RUN apt-get install -y nginx
+
+RUN rm /var/log/nginx/access.log && ln -s /dev/stdout /var/log/nginx/access.log
+RUN rm /var/log/nginx/error.log && ln -s /dev/stderr /var/log/nginx/error.log
+
+COPY ./html /var/www/html
+
+CMD ["nginx","-g", "daemon off;"]
+```
+
+This let us copy all the contents (one file for now) of the local html folder
+into the `/var/www/html` one.
+
+More about this in [Copying data][copying data].
+
 [using logfiles]: https://learndocker.online/courses/2/74
+[copying data]: https://learndocker.online/courses/2/91
