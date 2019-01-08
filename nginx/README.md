@@ -65,3 +65,28 @@ RUN apt-get install -y nginx
 
 CMD ["nginx","-g", "daemon off;"]
 ```
+
+Using logfiles
+---
+
+The second caveat of our custom nginx image is we can't have the logs
+on the nginx. The reason is related to what is the nginx daeamon doing:
+writing the logs to a custom file instead of the $STDOUT.
+
+For now, instead of the change the configuration we did a workaround, changing
+our Dockerfile to this:
+
+```
+FROM debian:9-slim
+
+RUN apt-get update
+RUN apt-get install -y nginx
+
+RUN rm /var/log/nginx/access.log && ln -s /dev/stdout /var/log/nginx/access.log
+
+CMD ["nginx","-g", "daemon off;"]
+```
+
+More about this in [Using logfiles][using logfiles].
+
+[using logfiles]: https://learndocker.online/courses/2/74
