@@ -150,6 +150,24 @@ CMD ["nginx","-g", "daemon off;"]
 
 More about this on [Copying multiple files][copying multiple files]
 
+The magic of ADD
+---
+
+The `ADD` command does more or less the same as the `COPY` command, but with
+additional tricks!:
+
+```diff
+-COPY ./html/ /var/www/html/
++ADD ./html.tar.gz /var/www/
+```
+
+The previous diff show a nice change: instead of copy all the folder structure
+we are instructing the build to use a compressed tar file we will expand on
+the `/var/www/` folder, which will result on the same files on the image! (Neat!)
+
+More about this in [The magic of ADD][magic of ADD]
+
 [using logfiles]: https://learndocker.online/courses/2/74
 [copying data]: https://learndocker.online/courses/2/91
 [copying multiple files]: https://learndocker.online/courses/2/93
+[magic of ADD]: https://learndocker.online/courses/2/94
