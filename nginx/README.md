@@ -165,6 +165,17 @@ The previous diff show a nice change: instead of copy all the folder structure
 we are instructing the build to use a compressed tar file we will expand on
 the `/var/www/` folder, which will result on the same files on the image! (Neat!)
 
+But there's more! `ADD` can also errmmm add remote files:
+
+```diff
++ADD https://example.com/index.html /var/www/html/example.html
+```
+
+The previous diff shows how it would download a file from an external URL and
+added to the `/var/www/html/` folder as `example.html`. This is also nice, but
+please, only trust your own URLs, IMO is one of the wrost thing you can do
+to just download files from the any other site.
+
 More about this in [The magic of ADD][magic of ADD]
 
 [using logfiles]: https://learndocker.online/courses/2/74
