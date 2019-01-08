@@ -83,9 +83,12 @@ RUN apt-get update
 RUN apt-get install -y nginx
 
 RUN rm /var/log/nginx/access.log && ln -s /dev/stdout /var/log/nginx/access.log
+RUN rm /var/log/nginx/error.log && ln -s /dev/stderr /var/log/nginx/error.log
 
 CMD ["nginx","-g", "daemon off;"]
 ```
+
+The takeaway of the lesson: If possible, try to send the logs to $STDOUT & $STDERR instead of a custom file when using container based applications. If not, linking file can solve the problem.
 
 More about this in [Using logfiles][using logfiles].
 
