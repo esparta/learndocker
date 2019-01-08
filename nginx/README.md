@@ -47,3 +47,21 @@ Connection: keep-alive
 ETag: "5c2f8723-264"
 Accept-Ranges: bytes
 ```
+
+First troubleshooting
+---
+
+The container based on our custom image had a caveat: it doesn't stops
+when using Ctrl+C, the reason it's related on how Docker handle the first
+process (PID 1), the chapter 7 of the course (2/69) explains better why
+we need to ange our Dockerfile to this:
+
+```
+# Second version of our Dockerfile
+FROM debian:9-slim
+
+RUN apt-get update
+RUN apt-get install -y nginx
+
+CMD ["nginx","-g", "daemon off;"]
+```
