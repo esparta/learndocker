@@ -1,0 +1,49 @@
+Custom nginx image
+===
+
+Here we created our new image based on a debian:9-slim image, and installed
+nginx inside.
+
+This image helped us to review the lifecycle of the docker's containers:
+
+Basics
+---
+
+Create the image was just simple. The `FROM`, `RUN` and `CMD` instructions
+of the Dockerfile made it so easy:
+
+```
+FROM debian:9-slim
+
+RUN apt-get update
+RUN apt-get install -y nginx
+
+CMD nginx -g 'daemon off;'
+```
+
+The image was build with the usual command:
+
+```
+docker image build -t esparta/nginx:latest .
+```
+
+And runned as normal:
+
+```
+docker container run --rm --name c1 -p 80:80 esparta/nginx:latest
+```
+
+We can test it work:
+
+```
+curl localhost -I
+HTTP/1.1 200 OK
+Server: nginx/1.10.3
+Date: Tue, 08 Jan 2019 06:39:42 GMT
+Content-Type: text/html
+Content-Length: 612
+Last-Modified: Fri, 04 Jan 2019 16:17:39 GMT
+Connection: keep-alive
+ETag: "5c2f8723-264"
+Accept-Ranges: bytes
+```
