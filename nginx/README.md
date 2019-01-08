@@ -117,5 +117,20 @@ into the `/var/www/html` one.
 
 More about this in [Copying data][copying data].
 
+Copying multiple files
+---
+
+We can also instruct the build to have multiple directories:
+
+```
+-COPY ./html /var/www/html
++COPY ./html ./html/assets/ ./html/css/ /var/www/html/
+
+```
+
+The caveat here is that all the files on the `assets` & `css` files into
+the `/var/www/html`, but not the folder structure.
+
+
 [using logfiles]: https://learndocker.online/courses/2/74
 [copying data]: https://learndocker.online/courses/2/91
