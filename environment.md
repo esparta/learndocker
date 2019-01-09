@@ -35,3 +35,27 @@ All the new containers using the modified image will have this new ENV var
 already set. Of course, we can combine with the `-e` flag to add more vars
 or overwrite the default ones.
 
+
+Assigning multiple ENVs using a file
+---
+
+We can use `--env-file` flag to set multiple ENV on execution time:
+
+```
+# app.env
+MYVAR=test
+FOO=bar
+```
+
+Then, use the `docker container run` command and specify the file:
+
+```
+docker container run -it --rm --env-file=app.env esparta/my-alpine
+11731965e8bc:/#export
+declare -x FOO="bar"
+declare -x HOSTNAME="11731965e8bc"
+declare -x MYVAR="test"
+declare -x PS1="\\h:\\w#"
+```
+Our new variables are there (along with the any others we can have).
+
