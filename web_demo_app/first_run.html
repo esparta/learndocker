@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>Welcome to the sample web app on Docker!</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h1>Welcome to the sample web app on Docker!</h1>
+          <p>
+          If you see this page, the web app is running inside a Docker container!<br />
+          Requests are logged to a PostgreSQL database.
+          </p>
+
+          <h3>The last 25 requests</h3>
+          <table class="table">
+            <tr>
+              <th>Timestamp</th>
+              <th>Client IP</th>
+              <th>Server (Container)</th>
+              <th>Path</th>
+            </tr>
+            
+              <tr>
+                <td>2019-01-15 08:02:03 UTC</td>
+                <td>172.28.5.0</td>
+                <td>59f44ce0e9c1</td>
+                <td>/</td>
+              </tr>
+            
+        </div>
+      </div>
+    </div>
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
+</html>
