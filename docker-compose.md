@@ -167,3 +167,71 @@ Creating nginx_pg_1  ... done
 More details about Using a Volume with Docker Compose, here:
 
 https://learndocker.online/courses/2/132
+
+Interacting on Composition
+---
+
+For the sake of demostration Julian added another service to the composing, an
+alpine image:
+
+```diff
++++ b/nginx/docker-compose.yml
+@@ -15,5 +15,11 @@ services:
+     volumes:
+            - pg-data:/var/lib/postgresql/data
+
++  alpine:
++    image: alpine:latest
++    stdin_open: true
++    tty: true
++    command: sh
++
+ volumes:
+    pg-data:
+```
+
+After setting up with `docker-compose up -d` we can examine the state of our
+composition with `docker-compose ps`:
+
+```bash
+$docker-compose ps
+Name                   Command              State         Ports
+---------------------------------------------------------------------------
+nginx_alpine_1   sh                              Up
+nginx_pg_1       docker-entrypoint.sh postgres   Up      5432/tcp
+nginx_web_1      nginx -g daemon off;            Up      0.0.0.0:80->80/tcp
+```
+
+All our services are up and running. We can notice the published ports also.
+Since `docker-compose` do all for us, it make the communication way to easy:
+
+```bash
+# We can communicate using the name of the container...
+/ # ping nginx_pg_1
+PING nginx_pg_1 (172.26.0.2): 56 data bytes
+64 bytes from 172.26.0.2: seq=0 ttl=64 time=0.188 ms
+64 bytes from 172.26.0.2: seq=1 ttl=64 time=0.130 ms
+64 bytes from 172.26.0.2: seq=2 ttl=64 time=0.128 ms
+64 bytes from 172.26.0.2: seq=3 ttl=64 time=0.166 ms
+^C
+--- nginx_pg_1 ping statistics ---
+4 packets transmitted, 4 packets received, 0% packet loss
+round-trip min/avg/max = 0.128/0.153/0.188 ms
+
+# Or using the name of the service itself
+
+/ # ping pg
+PING pg (172.26.0.2): 56 data bytes
+64 bytes from 172.26.0.2: seq=0 ttl=64 time=0.136 ms
+64 bytes from 172.26.0.2: seq=1 ttl=64 time=0.162 ms
+64 bytes from 172.26.0.2: seq=2 ttl=64 time=0.128 ms
+64 bytes from 172.26.0.2: seq=3 ttl=64 time=0.126 ms
+^C
+--- pg ping statistics ---
+4 packets transmitted, 4 packets received, 0% packet loss
+round-trip min/avg/max = 0.126/0.138/0.162 ms
+```
+
+More details about communication on composed docker:
+
+https://learndocker.online/courses/2/133
