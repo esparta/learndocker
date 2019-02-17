@@ -127,3 +127,43 @@ image and did run both, the web and pg services. Pretty neat.
 More details here:
 
 https://learndocker.online/courses/2/131
+
+Adding a volume
+---
+
+Having a database running is ok, but we need to persist the information of that
+server, we can add a volume as easy as this:
+
+```diff
+--- a/nginx/docker-compose.yml
++++ b/nginx/docker-compose.yml
+@@ -12,3 +12,8 @@ services:
+     image: postgres:9.6-alpine
+          env_file:
+                 - ./db.env
++    volumes:
++      - pg-data:/var/lib/postgresql/data
++
++volumes:
++  pg-data:
+ ```
+
+Since `docker-compose` is managing our resources, we add the volumes as an
+individual resource key. The volume values at `pg` service level indicates that
+volume will be used on `pg` service and mounted on `/var/lib/postgresql/data`
+folder.
+
+If we execute the `docker-compose` command, we can see how a new volume was
+created:
+
+```
+$docker-compose up -d
+Creating network "nginx_default" with the default driver
+Creating volume "nginx_pg-data" with default driver
+Creating nginx_web_1 ... done
+Creating nginx_pg_1  ... done
+```
+
+More details about Using a Volume with Docker Compose, here:
+
+https://learndocker.online/courses/2/132
