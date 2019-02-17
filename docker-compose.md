@@ -71,3 +71,59 @@ Removing network nginx_default
 In the same way `docker-compose` did create the thing, it will be cleaning up.
 
 More about docker-compose introduction: https://learndocker.online/courses/2/129
+
+Adding a new service
+---
+
+We can add more services to our current mix just adding a new service:
+
+```diff
++  pg:
++    image: postgres:9.6-alpine
++    env_file:
++      - ./db.env
+```
+
+The previous diff show what we did: Adding a new service called pg, using the
+image `postgres:9.6-alpine` image, and a environment file calle `db.env`:
+
+```
+POSTGRES_DB=web_app_db
+POSTGRES_USER=app
+POSTGRES_PASSWORD=secret
+```
+
+Running this second service would do the expected:
+
+```
+Creating network "nginx_default" with the default driver
+Pulling pg (postgres:9.6-alpine)...
+9.6-alpine: Pulling from library/postgres
+6c40cc604d8e: Pull complete
+3ea5fa93d025: Pull complete
+146f5c88cacb: Pull complete
+eb2d56ef9a96: Pull complete
+7e4e0ef1270a: Pull complete
+aad54f9c97b2: Pull complete
+c42b6e0f3ebb: Pull complete
+f8eea6cb6175: Pull complete
+51965c33bfa2: Pull complete
+Creating nginx_pg_1  ... done
+Creating nginx_web_1 ... done
+Attaching to nginx_pg_1, nginx_web_1
+pg_1   | The files belonging to this database system will be owned by user
+"postgres".
+pg_1   | This user must also own the server process.
+pg_1   |
+pg_1   | The database cluster will be initialized with locale "en_US.utf8".
+pg_1   | The default database encoding has accordingly been set to "UTF8".
+pg_1   | The default text search configuration will be set to "english".
+[....more stuffs]
+```
+
+Since I didn't have the image, the `docker-compose` pulled all the needed:
+image and did run both, the web and pg services. Pretty neat.
+
+More details here:
+
+https://learndocker.online/courses/2/131

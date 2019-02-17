@@ -8,3 +8,7 @@ services:
     volumes:
       - ./html:/usr/share/nginx/html
 
+  pg:
+    image: postgres:9.6-alpine
+    env_file:
+      - ./db.env
