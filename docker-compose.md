@@ -235,3 +235,166 @@ round-trip min/avg/max = 0.126/0.138/0.162 ms
 More details about communication on composed docker:
 
 https://learndocker.online/courses/2/133
+
+Scaling a service
+===
+
+In our example we did execute a service publishing an application using
+an specific port (9292, in our case), we can scale de service utilizing a
+load balancer as seen on previous lessons.
+
+As a reminder, this is what does the trick in our Load Balancer:
+
+```
+server {
+  listen 80 default_server;
+
+  resolver 127.0.0.11 valid=1s;
+
+  set $protocol $PROXY_PROTOCOL;
+  set $upstream $PROXY_UPSTREAM;
+
+  location / {
+    proxy_pass $protocol://$upstream$request_uri;
+
+    proxy_pass_header Authorization;
+
+  [...]
+```
+
+On the previous snipet of the nginx configuration (the server we use as
+Load Balancer) we define an upstream server and pass them along, that upstream
+is defined via a env variable called `$PROXY_UPSTREAM` with a value of
+`webapp:9292`:
+
+```diff
+diff --git a/compose_example/.env b/compose_example/.env
+index a4e5fcb..83cd697 100644
+--- a/compose_example/.env
++++ b/compose_example/.env
+@@ -2,3 +2,4 @@ POSTGRES_DB=web_app_db
+ POSTGRES_USER=app
+ POSTGRES_PASSWORD=secret
+ POSTGRES_HOST=pg
++PROXY_UPSTREAM=webapp:9292
+```
+
+Incorporte the new load balancer is simple as it look, just adding a new
+service using the Load Balancer image:
+
+```diff
+ services:
+ +  lb:
+ +    image: esparta/lb:latest
+ +    depends_on:
+ +      - webapp
+ +    environment:
+ +      - PROXY_UPSTREAM
+ +    ports:
+ +      - 80:80
+ +
+    pg:
+      image: postgres:9.6-alpine
+      environment:
+      @@ -11,9 +22,9 @@ services:
+      - pg-data:/var/lib/postgresql/data
+
+    webapp:
+      image: jfahrer/demo_web_app:latest
+ -    ports:
+ -      - 9292:9292
+ +
+```
+
+And that's it. The Load Balancer has published a port 80 and internally ask
+for thr webapp, Docker will respond with any of the `webapp` ips, and that
+would make it scalable. By default `docker-compose` will run only one
+service declared. So we can add more with `--scale` directive:
+
+```bash
+$ docker-compose up -d --scale webapp=5
+
+compose_example_pg_1 is up-to-date
+Starting compose_example_webapp_1 ... done
+Creating compose_example_webapp_2 ... done
+Creating compose_example_webapp_3 ... done
+Creating compose_example_webapp_4 ... done
+Creating compose_example_webapp_5 ... done
+compose_example_lb_1 is up-to-date
+```
+
+Resulting on more `webapp` services:
+
+```
+Name                                  Command               State         Ports
+--------------------------------------------------------------------------------------
+compose_example_lb_1       /start.sh                        Up      0.0.0.0:80->80/tcp
+compose_example_pg_1       docker-entrypoint.sh postgres    Up      5432/tcp
+compose_example_webapp_1   /app/bin/docker-entrypoint ...   Up      9292/tcp
+compose_example_webapp_2   /app/bin/docker-entrypoint ...   Up      9292/tcp
+compose_example_webapp_3   /app/bin/docker-entrypoint ...   Up      9292/tcp
+compose_example_webapp_4   /app/bin/docker-entrypoint ...   Up      9292/tcp
+compose_example_webapp_5   /app/bin/docker-entrypoint ...   Up      9292/tcp
+```
+
+De-scaling is just the inverse:
+
+```bash
+$docker-compose up -d --scale webapp=1
+compose_example_pg_1 is up-to-date
+Stopping and removing compose_example_webapp_2 ... done
+Stopping and removing compose_example_webapp_3 ... done
+Stopping and removing compose_example_webapp_4 ... done
+Stopping and removing compose_example_webapp_5 ... done
+Starting compose_example_webapp_1              ... done
+compose_example_lb_1 is up-to-date
+```
+
+Listing the process on the composition...
+
+```bash
+$docker-compose ps
+
+Name                                  Command               State         Ports
+--------------------------------------------------------------------------------------
+compose_example_lb_1       /start.sh                        Up      0.0.0.0:80->80/tcp
+compose_example_pg_1       docker-entrypoint.sh postgres    Up      5432/tcp
+compose_example_webapp_1   /app/bin/docker-entrypoint ...   Up      9292/tcp
+```
+
+Note: While I was testing scaling of the Load Balancer I also found a problem
+it should not be happening:
+
+```
+WARNING: The "webapp" service specifies a port on the host. If multiple
+containers for this service are created on a single host, the port will clash.
+Starting compose_example_webapp_1 ... done
+Creating compose_example_webapp_2 ... error
+Creating compose_example_webapp_3 ... error
+Creating compose_example_webapp_4 ... error
+Creating compose_example_webapp_5 ... error
+
+ERROR: for compose_example_webapp_2  Cannot start service webapp: driver failed
+programming external connectivity on endpoint compose_example_webapp_2
+(36115ad768775b052d0804709653ec05054a913ccf84187b828be5deec79dcaa): Bind for
+0.0.0.0:9292 failed: port is already allocated
+
+[... Four identical errors just chaning the ID ...]
+
+ERROR: for webapp  Cannot start service webapp: driver failed programming
+external connectivity on endpoint compose_example_webapp_2
+(36115ad768775b052d0804709653ec05054a913ccf84187b828be5deec79dcaa): Bind for
+0.0.0.0:9292 failed: port is already allocated
+
+ERROR: Encountered errors while bringing up the project.
+```
+
+Even with the clear error message it wasn't that obvious what was happening. I was
+trying to scale the application adding 4 more `webapp` services, but not able to
+because I forgot to unpublish the ports that `webapp` was doing. Going directly
+to that error, basically a: "I can't create more `webapp` services because
+the port is already binded and used on the first one, if add another one you
+will have a really nasty problem". Removing the `ports` section on `webapp`
+solved the problem.
+
+More about scaling on LearnDocker: https://learndocker.online/courses/2/141

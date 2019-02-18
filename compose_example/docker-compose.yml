@@ -1,6 +1,15 @@
 version: '3.3'
 
 services:
+  lb:
+    image: esparta/lb:latest
+    depends_on:
+      - webapp
+    environment:
+      - PROXY_UPSTREAM
+    ports:
+      - 80:80
+
   pg:
     image: postgres:9.6-alpine
     environment:
@@ -11,9 +20,9 @@ services:
       - pg-data:/var/lib/postgresql/data
 
   webapp:
-    image: jfahrer/demo_web_app:latest
-    ports:
-      - 9292:9292
+    image: jfahrer/demo_web_app:wait_for_pg
+    depends_on:
+      - pg
     environment:
       - POSTGRES_DB
       - POSTGRES_USER
