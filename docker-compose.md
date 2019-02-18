@@ -398,3 +398,72 @@ will have a really nasty problem". Removing the `ports` section on `webapp`
 solved the problem.
 
 More about scaling on LearnDocker: https://learndocker.online/courses/2/141
+
+Building while composing
+===
+
+I also learned how to build the image in the mix: as simple as adding a `build`
+entry on their service:
+
+```
+ services:
+    lb:
+      image: esparta/lb:latest
++     build:
++      context: ../load_balancer
+      depends_on:
+```
+
+In the previous diff it's kind of clear that, if we instruct `docker-compose`
+to build the image, it need to load whatever it is on the directory
+`load_balancer` on the parent directory:
+
+```bash
+$docker-compose build
+pg uses an image, skipping
+webapp uses an image, skipping
+Building lb
+Step 1/5 : FROM nginx:1.13.9
+ ---> 73acd1f0cfad
+Step 2/5 : ENV PROXY_PROTOCOL=http PROXY_UPSTREAM=example.com
+ ---> Using cache
+ ---> f2437aa92e79
+Step 3/5 : COPY proxy.conf /etc/nginx/conf.d/default.template
+ ---> Using cache
+ ---> 25beb2429e07
+Step 4/5 : COPY start.sh /
+ ---> aa0940aa6a29
+Step 5/5 : CMD ["/start.sh"]
+ ---> Running in 9d09abb62047
+Removing intermediate container 9d09abb62047
+---> d01b076e655f
+
+Successfully built d01b076e655f
+Successfully tagged esparta/lb:latest
+```
+
+the services `pg` and `webapp` as being skipped, and it's correct because
+all the other services doesn't have build section.
+
+Of course, we can specify which service is goint to be build:
+
+```
+Building lb
+Step 1/5 : FROM nginx:1.13.9
+ ---> 73acd1f0cfad
+Step 2/5 : ENV PROXY_PROTOCOL=http PROXY_UPSTREAM=example.com
+ ---> Using cache
+ ---> f2437aa92e79
+Step 3/5 : COPY proxy.conf /etc/nginx/conf.d/default.template
+ ---> Using cache
+ ---> 25beb2429e07
+Step 4/5 : COPY start.sh /
+ ---> Using cache
+ ---> aa0940aa6a29
+Step 5/5 : CMD ["/start.sh"]
+ ---> Using cache
+ ---> d01b076e655f
+
+Successfully built d01b076e655f
+Successfully tagged esparta/lb:latest
+```
